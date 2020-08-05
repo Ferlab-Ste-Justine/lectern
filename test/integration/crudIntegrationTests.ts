@@ -50,7 +50,7 @@ chai.use(require('chai-http'));
 
 describe('CRUD', () => {
   before(async () => {
-    container = await new GenericContainer('mongo', 'xenial').withExposedPorts(27017).start();
+    container = await new GenericContainer('mongo', '4').withExposedPorts(27017).start();
     mongoose
       .connect(
         constructTestUri(
