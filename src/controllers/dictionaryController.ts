@@ -40,6 +40,11 @@ export const createDictionary = async (req: Request, res: Response) => {
   res.status(200).send(dict.toObject());
 };
 
+export const validateDictionary = async (req: Request, res: Response) => {
+  const isValid = await dictionaryService.isValid(req.body);
+  res.status(200).send(isValid);
+};
+
 export const addSchema = async (req: Request, res: Response) => {
   const dict = await dictionaryService.addSchema(req.params.dictId, req.body);
   res.status(200).send(dict.toObject());

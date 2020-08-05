@@ -73,29 +73,8 @@ export const create = async (newDict: {
   schemas: any[];
   references: any;
 }): Promise<DictionaryDocument> => {
-  logger.info(`Creating new dictionary ${newDict.name} ${newDict.version}`);
-
-  // Verify version is correct format
-  if (!isValidVersion(newDict.version)) {
-    throw new BadRequestError('Invalid version format');
-  }
-
-  const latest = await getLatestVersion(newDict.name);
-
-  if (!isGreater(newDict.version, latest)) {
-    logger.warn(
-      `Rejected ${newDict.name} due to version ${newDict.version} being lower than latest: ${latest}`,
-    );
-    throw new BadRequestError(
-      `New version for ${newDict.name} is not greater than latest existing version`,
-    );
-  }
-
-  // Verify schemas match dictionary
-  newDict.schemas.forEach(e => {
-    const result = validate(e, newDict.references || {});
-    if (!result.valid) throw new BadRequestError(JSON.stringify(result.errors));
-  });
+  // If invalid, will throw an Error
+  await isValid(newDict);
 
   // Save new dictionary version
   const dict = new Dictionary({
@@ -106,6 +85,42 @@ export const create = async (newDict: {
   });
   const saved = await dict.save();
   return saved;
+};
+
+/**
+ * Validates a new data dictionary version with included schemas, verifying version doesn't exist
+ * and that the schemas are valid against the meta schema.
+ * @param newDict The new data dictionary containing all of the schemas
+ */
+export const isValid = async (newDict: {
+  name: string;
+  version: string;
+  schemas: any[];
+  references: any;
+}) => {
+  logger.info(`Validating new dictionary ${newDict.name} ${newDict.version}`);
+
+  // Verify version is correct format
+  if (!isValidVersion(newDict.version)) {
+    throw new BadRequestError('Invalid version format');
+  }
+
+  const latest = await getLatestVersion(newDict.name);
+
+  if (!isGreater(newDict.version, latest)) {
+    logger.warn(
+        `Rejected ${newDict.name} due to version ${newDict.version} being lower than latest: ${latest}`,
+    );
+    throw new BadRequestError(
+        `New version for ${newDict.name} is not greater than latest existing version`,
+    );
+  }
+
+  // Verify schemas match dictionary
+  newDict.schemas.forEach(e => {
+    const result = validate(e, newDict.references || {});
+    if (!result.valid) throw new BadRequestError(JSON.stringify(result.errors));
+  });
 };
 
 /**

@@ -5,6 +5,40 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/validate": {
+      "post": {
+        "summary": "Validate a new dictionary",
+        "description": "Validates the provided dictionary in lectern. Must not conflict with a previous dictionary name and version business key",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDictionary"
+              }
+            }
+          },
+          "description": "The dictionary to be validated",
+          "required": true
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request: the dictionary is invalid"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": ["Dictionaries"]
+      }
+    },
     "/dictionaries": {
       "get": {
         "summary": "Get dictionaries stored in lectern",

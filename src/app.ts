@@ -54,6 +54,7 @@ const App = (config: AppConfig): Express => {
     res.send(details);
   });
 
+  app.post('/validate', egoDecorator(dictionaryController.validateDictionary));
   app.get('/dictionaries', wrapAsync(dictionaryController.listDictionaries));
   app.post('/dictionaries', egoDecorator(dictionaryController.createDictionary));
   app.get('/dictionaries/:dictId', wrapAsync(dictionaryController.getDictionary));
