@@ -12,6 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Log into registry
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u chusj --password-stdin
-      - name: Publish the image
-        run: ./push_image.sh
+        run: echo "${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}" | docker login -u ${{ secrets.FERLAB_DOCKER_HUB_USER }} --password-stdin
+      - name: Push the lectern image on the docker registry
+        uses: Ferlab-Ste-Justine/action-push-image@master
+        with:
+          username: ${{ secrets.FERLAB_DOCKER_HUB_USER }}
+          password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
+          image: ferlabcrsj/lectern
+          tag_source: ref
+          location: .
+          dockerfile: Dockerfile
