@@ -17,6 +17,6 @@ jobs:
           username: ${{ secrets.FERLAB_DOCKER_HUB_USER }}
           password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
           image: ferlabcrsj/lectern
-          tag_source: ref
+          tag_source: sha
           location: .
           dockerfile: Dockerfile
