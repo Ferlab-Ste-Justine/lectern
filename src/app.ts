@@ -29,6 +29,7 @@ const App = (config: AppConfig): Express => {
   // Create Express server with mongoConfig
   const app = express();
   const serverPort = config.serverPort();
+  const serverBindIp = config.serverBindIp();
   const openApiPath = config.openApiPath();
 
   app.set('port', serverPort);
@@ -43,7 +44,7 @@ const App = (config: AppConfig): Express => {
   swagger['info']['version'] = process.env.npm_package_version;
   app.use(openApiPath, swaggerUi.serve, swaggerUi.setup(swagger));
 
-  logger.info(`OpenAPI setup... done: http://localhost:${serverPort}${openApiPath}`);
+  logger.info(`OpenAPI setup... done: http://${serverBindIp}:${serverPort}${openApiPath}`);
 
   app.get('/', (_, res) => {
     const details = {
