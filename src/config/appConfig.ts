@@ -4,6 +4,7 @@ import * as vault from '../vault';
 export interface AppConfig {
   // Express
   serverPort(): string;
+  serverBindIp(): string;
   openApiPath(): string;
 
   // Mongo
@@ -43,6 +44,10 @@ const buildAppContext = async (secrets: any): Promise<AppConfig> => {
   const config: AppConfig = {
     serverPort(): string {
       return process.env.PORT || '3000';
+    },
+
+    serverBindIp(): string {
+      return process.env.BIND_IP || '0.0.0.0';
     },
 
     openApiPath(): string {

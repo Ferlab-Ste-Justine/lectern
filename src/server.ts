@@ -55,8 +55,8 @@ let server: Server;
        * Start Express server.
        */
       const app = App(appConfig);
-      server = app.listen(app.get('port'), () => {
-        logger.info(`App is running at http://localhost:${app.get('port')} in ${app.get('env')} mode`);
+      server = app.listen(app.get('port'), appConfig.serverBindIp(), () => {
+        logger.info(`App is running at http://${appConfig.serverBindIp()}:${app.get('port')} in ${app.get('env')} mode`);
         logger.info('Press CTRL-C to stop');
       });
     })
