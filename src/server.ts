@@ -4,6 +4,7 @@ import { constructMongoUri } from './utils/mongo';
 import logger from './config/logger';
 import { Server } from 'http';
 import { getAppConfig } from './config/appConfig';
+import { readFileSync } from 'fs';
 
 let server: Server;
 
@@ -33,30 +34,34 @@ let server: Server;
     logger.error('Ran out of reconnect attempts, abandoning...');
   });
 
-  mongoose
-    .connect(constructMongoUri(appConfig), {
-      autoReconnect: true,
-      socketTimeoutMS: 10000,
-      connectTimeoutMS: 30000,
-      keepAlive: true,
-      reconnectTries: 10,
-      reconnectInterval: 3000,
-      useNewUrlParser: true,
+  Promise.resolve(true)
+    .then(() => {
+      const caFile = appConfig.mongoTlsCAFile();
+      return mongoose.connect(constructMongoUri(appConfig), {
+        autoReconnect: true,
+        socketTimeoutMS: 10000,
+        connectTimeoutMS: 30000,
+        keepAlive: true,
+        reconnectTries: 10,
+        reconnectInterval: 3000,
+        useNewUrlParser: true,
+        ssl: appConfig.mongoTls(),
+        sslValidate: appConfig.mongoTls(),
+        sslCA: caFile == '' ? [] : [readFileSync(caFile)],
+      });
     })
     .then(() => {
-      /** ready to use. The `mongoose.connect()` promise resolves to undefined. */
+      /**
+       * Start Express server.
+       */
+      const app = App(appConfig);
+      server = app.listen(app.get('port'), () => {
+        logger.info(`App is running at http://localhost:${app.get('port')} in ${app.get('env')} mode`);
+        logger.info('Press CTRL-C to stop');
+      });
     })
     .catch((err: Error) => {
       logger.error('MongoDB connection error. Please make sure MongoDB is running. ' + err);
-      process.exit();
+      process.exit(1);
     });
-
-  /**
-   * Start Express server.
-   */
-  const app = App(appConfig);
-  server = app.listen(app.get('port'), () => {
-    logger.info(`App is running at http://localhost:${app.get('port')} in ${app.get('env')} mode`);
-    logger.info('Press CTRL-C to stop');
-  });
 })();
