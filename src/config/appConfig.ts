@@ -13,6 +13,8 @@ export interface AppConfig {
   mongoPassword(): string;
   mongoDb(): string;
   mongoUrl(): string; // allow overriding all the url
+  mongoTls(): boolean;
+  mongoTlsCAFile(): string;
 }
 
 const buildBootstrapContext = async () => {
@@ -68,6 +70,18 @@ const buildAppContext = async (secrets: any): Promise<AppConfig> => {
     },
     mongoUrl(): string {
       return secrets.MONGO_URL || process.env.MONGO_URL;
+    },
+    mongoTls(): boolean {
+      if (secrets.MONGO_TLS) {
+        return secrets.MONGO_TLS === 'true';
+      }
+      if (process.env.MONGO_TLS) {
+        return process.env.MONGO_TLS === 'true';
+      }
+      return false;
+    },
+    mongoTlsCAFile(): string {
+      return secrets.MONGO_TLS_CA_FILE || process.env.MONGO_TLS_CA_FILE || '';
     },
   };
   return config;
