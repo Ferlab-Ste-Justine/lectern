@@ -37,9 +37,6 @@ let server: Server;
   Promise.resolve(true)
     .then(() => {
       const caFile = appConfig.mongoTlsCAFile();
-      return caFile == '' ? Buffer.from('') : readFileSync(caFile);
-    })
-    .then((caCert: Buffer) => {
       return mongoose.connect(constructMongoUri(appConfig), {
         autoReconnect: true,
         socketTimeoutMS: 10000,
@@ -50,7 +47,7 @@ let server: Server;
         useNewUrlParser: true,
         ssl: appConfig.mongoTls(),
         sslValidate: appConfig.mongoTls(),
-        sslCA: [caCert],
+        sslCA: caFile == '' ? [] : [readFileSync(caFile)],
       });
     })
     .then(() => {
