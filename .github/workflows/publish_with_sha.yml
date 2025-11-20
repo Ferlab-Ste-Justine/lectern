@@ -18,3 +18,4 @@ jobs:
           password: ${{ secrets.FERLAB_DOCKER_HUB_TOKEN }}
           image: ferlabcrsj/lectern
           tag_format: "{sha}-{timestamp}"
+          dockerfile: apps/server/Dockerfile
