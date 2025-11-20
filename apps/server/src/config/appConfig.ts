@@ -24,6 +24,7 @@ export interface AppConfig {
 	// Express
 	serverPort(): string;
 	openApiPath(): string;
+  serverBindIp(): string;
 	corsAllowedOrigins(): string[];
 
 	// Mongo
@@ -33,6 +34,8 @@ export interface AppConfig {
 	mongoPassword(): string;
 	mongoDb(): string;
 	mongoUrl(): string; // allow overriding all the url
+  mongoTls(): boolean;
+  mongoTlsCAFile(): string;
 }
 
 const buildBootstrapContext = async () => {
@@ -63,7 +66,12 @@ const buildAppContext = async (secrets: any): Promise<AppConfig> => {
 			return process.env.PORT || '3000';
 		},
 
-		openApiPath(): string {
+    serverBindIp(): string {
+      return process.env.BIND_IP || '0.0.0.0';
+    },
+
+
+    openApiPath(): string {
 			return process.env.OPENAPI_PATH || '/api-docs';
 		},
 
@@ -95,6 +103,18 @@ const buildAppContext = async (secrets: any): Promise<AppConfig> => {
 		mongoUrl(): string {
 			return secrets.MONGO_URL || process.env.MONGO_URL;
 		},
+    mongoTls(): boolean {
+      if (secrets.MONGO_TLS) {
+        return secrets.MONGO_TLS === 'true';
+      }
+      if (process.env.MONGO_TLS) {
+        return process.env.MONGO_TLS === 'true';
+      }
+      return false;
+    },
+    mongoTlsCAFile(): string {
+      return secrets.MONGO_TLS_CA_FILE || process.env.MONGO_TLS_CA_FILE || '';
+    },
 	};
 	return config;
 };

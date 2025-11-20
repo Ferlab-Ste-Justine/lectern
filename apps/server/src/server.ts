@@ -23,6 +23,9 @@ import { setDBStatus, Status } from './app-health';
 import { getAppConfig } from './config/appConfig';
 import logger from './config/logger';
 import { constructMongoUri } from './utils/mongo';
+import { Server } from 'http';
+
+let server: Server;
 
 (async () => {
 	const appConfig = await getAppConfig();
@@ -57,10 +60,26 @@ import { constructMongoUri } from './utils/mongo';
 		setDBStatus(Status.ERROR);
 	});
 
-	mongoose
-		.connect(constructMongoUri(appConfig), { user: appConfig.mongoUser(), pass: appConfig.mongoPassword() })
+	Promise.resolve(true)
 		.then(() => {
-			/** ready to use. The `mongoose.connect()` promise resolves to undefined. */
+			const caFile = appConfig.mongoTlsCAFile();
+			return mongoose.connect(constructMongoUri(appConfig), {
+				socketTimeoutMS: 10000,
+				connectTimeoutMS: 30000,
+				ssl: appConfig.mongoTls(),
+				tlsAllowInvalidCertificates: appConfig.mongoTls(),
+				tlsCAFile: caFile,
+			});
+		})
+		.then(() => {
+			/**
+			 * Start Express server.
+			 */
+			const app = App(appConfig);
+			server = app.listen(app.get('port'), appConfig.serverBindIp(), () => {
+				logger.info(`App is running at http://${appConfig.serverBindIp()}:${app.get('port')} in ${app.get('env')} mode`);
+				logger.info('Press CTRL-C to stop');
+			});
 		})
 		.catch((err: Error) => {
 			logger.error('MongoDB connection error. Please make sure MongoDB is running. ' + err);

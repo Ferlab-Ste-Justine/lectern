@@ -19,6 +19,7 @@ dist
 
 # common editor application Configs
 .vscode
+.idea
 
 *.iml
 *.code-workspace
